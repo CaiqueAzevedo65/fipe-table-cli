@@ -1,4 +1,4 @@
-package br.com.myproject.fipe.services;
+package br.com.myproject.fipe.service;
 
 import org.springframework.stereotype.Service;
 

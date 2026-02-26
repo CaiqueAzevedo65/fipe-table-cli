@@ -1,12 +1,11 @@
 package br.com.myproject.fipe.main;
 
-import br.com.myproject.fipe.models.*;
-import br.com.myproject.fipe.services.FipeApiClient;
-import br.com.myproject.fipe.services.JacksonDataConverter;
+import br.com.myproject.fipe.dto.*;
+import br.com.myproject.fipe.service.FipeApiClient;
+import br.com.myproject.fipe.service.JacksonDataConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -44,18 +43,18 @@ public class FipeConsole {
         var codigoMarca = scanner.nextInt();
         scanner.nextLine();
 
-        ModeloListWrapper modelos = fetchModelos(tipoVeiculo, codigoMarca);
+        ModelosDTO modelos = fetchModelos(tipoVeiculo, codigoMarca);
 
         System.out.println(modelos);
 
-        modelos.modelosList().forEach(modelo -> System.out.println(
+        modelos.modelos().forEach(modelo -> System.out.println(
                 modelo.codigo() + " " + modelo.nome()
         ));
 
         System.out.println("Digite o nome de um veículo para consulta: ");
         var nomeVeiculo = scanner.nextLine().toLowerCase();
 
-        modelos.modelosList().stream()
+        modelos.modelos().stream()
                 .filter(modelo -> modelo.nome().toLowerCase().contains(nomeVeiculo))
                 .forEach(System.out::println);
 
@@ -65,11 +64,9 @@ public class FipeConsole {
 
         List<Ano> anos = fetchAnos(tipoVeiculo, codigoMarca, codigoModelo);
 
-        List<Veiculo> veiculos = new ArrayList<>();
-
-        for (Ano ano : anos) {
-            veiculos.add(fetchVeiculo(tipoVeiculo, codigoMarca, codigoModelo, ano.codigo()));
-        }
+        List<Veiculo> veiculos = anos.parallelStream() // paralelismo de instruções
+                .map(ano -> fetchVeiculo(tipoVeiculo, codigoMarca, codigoModelo, ano.codigo()))
+                .toList();
 
         System.out.println("Todos os veículos com os valores por ano:");
 
@@ -84,13 +81,13 @@ public class FipeConsole {
                 Marca.class);
     }
 
-    private ModeloListWrapper fetchModelos(String tipoVeiculo, int codigoMarca) {
+    private ModelosDTO fetchModelos(String tipoVeiculo, int codigoMarca) {
         return jacksonDataConverter.deserialize(
                 fipeApiClient.fetchJson(
                         apiBaseUrl + "/" + tipoVeiculo + "/marcas/"
                                 + codigoMarca + "/modelos"
                 ),
-                ModeloListWrapper.class);
+                ModelosDTO.class);
     }
 
     private List<Ano> fetchAnos(String tipoVeiculo, int codigoMarca, int codigoModelo) {

@@ -1,4 +1,4 @@
-package br.com.myproject.fipe.models;
+package br.com.myproject.fipe.dto;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

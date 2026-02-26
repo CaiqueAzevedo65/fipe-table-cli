@@ -1,4 +1,4 @@
-package br.com.myproject.fipe.services;
+package br.com.myproject.fipe.service;
 
 import java.util.List;
 
